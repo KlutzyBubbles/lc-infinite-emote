@@ -6,6 +6,8 @@ Loosens the CheckConditionsForEmotePatch to allow emoting while running and jump
 
 There is a key (0 by default) to stop emoting, emotes can also be stopped by crouching or interacting with things like ladders, terminal or 2 handed objects
 
+Additional settings can be found in the cfg file to adjust when emotes are allowed, for example to only allow walking emoting instead of running
+
 ## Known gripes
 
 - Emoting negates any animations so you wont see running animations etc
