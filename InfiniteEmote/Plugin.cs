@@ -17,6 +17,9 @@ namespace InfiniteEmote
         {
             StaticLogger = Logger;
 
+            ConfigEntry<string> configStopEmoteKey = Config.Bind("Keys", "Stop Emote Key", "<Keyboard>/0", "Default keybind to stop emoting");
+            Patches.stopEmoteKey = configStopEmoteKey.Value;
+
             ConfigEntry<bool> whileJumpingConfig = Config.Bind<bool>("Emote while", "Jumping", true, "Whether or not to allow emoting while Jumping");
             Patches.whileJumping = whileJumpingConfig.Value;
             ConfigEntry<bool> whileWalkingConfig = Config.Bind<bool>("Emote while", "Walking", true, "Whether or not to allow emoting while Walking");
@@ -38,6 +41,7 @@ namespace InfiniteEmote
             ConfigEntry<bool> whileHoldingTwoHandConfig = Config.Bind<bool>("Emote while", "HoldingTwoHand", true, "Whether or not to allow emoting while Holding a two handed object");
             Patches.whileHoldingTwoHand = whileHoldingTwoHandConfig.Value;
 
+            Patches.keybinds = new Keybinds();
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll(typeof(Patches));
             StaticLogger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }

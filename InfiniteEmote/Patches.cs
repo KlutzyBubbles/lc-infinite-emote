@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
 using GameNetcodeStuff;
+using UnityEngine.InputSystem;
 
 namespace InfiniteEmote
 {
     internal class Patches
     {
-        public static Keybinds keybinds = new Keybinds();
+        public static Keybinds keybinds;
 
         public static bool whileJumping;
         public static bool whileWalking;
@@ -18,19 +19,43 @@ namespace InfiniteEmote
         public static bool whileHolding;
         public static bool whileHoldingTwoHand;
 
+        public static string stopEmoteKey;
+
+        private static PlayerControllerB localPlayerController
+        {
+            get
+            {
+                StartOfRound instance = StartOfRound.Instance;
+                return (instance != null) ? instance.localPlayerController : null;
+            }
+        }
+
         [HarmonyPatch(typeof(PlayerControllerB), "Start")]
         [HarmonyPostfix]
         private static void StartPostfix(PlayerControllerB __instance)
         {
-            keybinds.StopEmote.performed += delegate
+            keybinds.StopEmote.performed += onStopEmoteKey;
+        }
+
+        [HarmonyPatch(typeof(PlayerControllerB), "OnDisable")]
+        [HarmonyPostfix]
+        public static void OnDisablePostfix(PlayerControllerB __instance)
+        {
+            if (__instance == localPlayerController)
             {
-                if (__instance.isPlayerControlled && __instance.IsOwner)
-                {
-                    __instance.performingEmote = false;
-                    __instance.StopPerformingEmoteServerRpc();
-                    __instance.timeSinceStartingEmote = 0f;
-                }
-            };
+                keybinds.StopEmote.performed -= onStopEmoteKey;
+                keybinds.StopEmote.Disable();
+            }
+        }
+
+        private static void onStopEmoteKey(InputAction.CallbackContext context)
+        {
+            if (localPlayerController.isPlayerControlled && localPlayerController.IsOwner)
+            {
+                localPlayerController.performingEmote = false;
+                localPlayerController.StopPerformingEmoteServerRpc();
+                localPlayerController.timeSinceStartingEmote = 0f;
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControllerB), "CheckConditionsForEmote")]
@@ -81,15 +106,11 @@ namespace InfiniteEmote
                     return false;
                 }
             }
-            bool? isJumpingOpt = Traverse.Create(__instance).Field("isJumping").GetValue() as bool?;
-            bool isJumping = isJumpingOpt ?? false;
-            if (whileJumping && isJumping)
+            if (whileJumping && __instance.isJumping)
             {
                 __result = true;
             }
-            bool? isWalkingOpt = Traverse.Create(__instance).Field("isWalking").GetValue() as bool?;
-            bool isWalking = isWalkingOpt ?? false;
-            if (whileWalking && isWalking)
+            if (whileWalking && __instance.isWalking)
             {
                 if (__instance.isSprinting)
                 {
@@ -122,7 +143,7 @@ namespace InfiniteEmote
             }
             if (__result == false)
             {
-                __result = !__instance.inSpecialInteractAnimation && !__instance.isPlayerDead && !isJumping && !isWalking && !__instance.isCrouching && !__instance.isClimbingLadder && !__instance.isGrabbingObjectAnimation && !__instance.inTerminalMenu && !__instance.isTypingChat;
+                __result = !__instance.inSpecialInteractAnimation && !__instance.isPlayerDead && !__instance.isJumping && !__instance.isWalking && !__instance.isCrouching && !__instance.isClimbingLadder && !__instance.isGrabbingObjectAnimation && !__instance.inTerminalMenu && !__instance.isTypingChat;
             }
             return false;
         }
