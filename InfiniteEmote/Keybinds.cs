@@ -1,5 +1,4 @@
 ﻿using LethalCompanyInputUtils.Api;
-using System;
 using UnityEngine.InputSystem;
 
 namespace InfiniteEmote
@@ -15,6 +14,7 @@ namespace InfiniteEmote
                 .WithActionId("StopEmote")
                 .WithActionType(InputActionType.Button)
                 .WithKbmPath(Patches.stopEmoteKey)
+                .WithGamepadPath(Patches.stopEmoteController)
                 .WithBindingName("Stop Emote")
                 .Finish();
         }

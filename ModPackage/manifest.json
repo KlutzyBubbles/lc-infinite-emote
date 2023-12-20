@@ -1,6 +1,6 @@
 {
     "name": "InfiniteEmote",
-    "version_number": "1.2.0",
+    "version_number": "1.2.1",
     "website_url": "https://github.com/KlutzyBubbles/lc-infinite-emote",
     "description": "[Configurable] Loosens the CheckConditionsForEmote to allow emoting while running and jumping",
     "dependencies": [

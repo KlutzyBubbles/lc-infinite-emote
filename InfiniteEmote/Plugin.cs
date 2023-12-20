@@ -18,7 +18,9 @@ namespace InfiniteEmote
             StaticLogger = Logger;
 
             ConfigEntry<string> configStopEmoteKey = Config.Bind("Keys", "Stop Emote Key", "<Keyboard>/0", "Default keybind to stop emoting");
-            Patches.stopEmoteKey = configStopEmoteKey.Value;
+            Patches.stopEmoteKey = configStopEmoteKey.Value.ToLower().StartsWith("<keyboard>") ? configStopEmoteKey.Value : $"<Keyboard>/{configStopEmoteKey.Value}";
+            ConfigEntry<string> configStopEmoteController = Config.Bind("Keys", "Stop Emote Button", "<Gamepad>/leftStickPress", "Default controller button to stop emoting");
+            Patches.stopEmoteController = configStopEmoteController.Value.ToLower().StartsWith("<gamepad>") ? configStopEmoteController.Value : $"<Gamepad>/{configStopEmoteController.Value}";
 
             ConfigEntry<bool> whileJumpingConfig = Config.Bind<bool>("Emote while", "Jumping", true, "Whether or not to allow emoting while Jumping");
             Patches.whileJumping = whileJumpingConfig.Value;

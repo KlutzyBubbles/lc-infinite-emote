@@ -20,6 +20,7 @@ namespace InfiniteEmote
         public static bool whileHoldingTwoHand;
 
         public static string stopEmoteKey;
+        public static string stopEmoteController;
 
         private static PlayerControllerB localPlayerController
         {
