@@ -107,40 +107,33 @@ namespace InfiniteEmote
                     return false;
                 }
             }
-            if (whileJumping && __instance.isJumping)
+            if (__instance.isJumping)
             {
-                __result = true;
+                __result = whileJumping;
             }
-            if (whileWalking && __instance.isWalking)
+            if (__instance.isWalking)
             {
-                if (__instance.isSprinting)
-                {
-                    __result = whileSprinting;
-                }
-                else
-                {
-                    __result = true;
-                }
+                __result = whileWalking;
             }
-            if (whileSprinting && __instance.isSprinting)
+            if (__instance.isSprinting)
             {
-                __result = true;
+                __result = whileSprinting;
             }
-            if (whileCrouching && __instance.isCrouching)
+            if (__instance.isCrouching)
             {
-                __result = true;
+                __result = whileCrouching;
             }
-            if (whileLadder && __instance.isClimbingLadder)
+            if (__instance.isClimbingLadder)
             {
-                __result = true;
+                __result = whileLadder;
             }
-            if (whileTyping && __instance.isTypingChat)
+            if (__instance.isTypingChat)
             {
-                __result = true;
+                __result = whileTyping;
             }
-            if (whileTerminal && __instance.inTerminalMenu)
+            if (__instance.inTerminalMenu)
             {
-                __result = true;
+                __result = whileTerminal;
             }
             if (__result == false)
             {

@@ -2,7 +2,7 @@
 
 Perfect for twerking off a ledge https://www.youtube.com/watch?v=NpD9i2i2faI
 
-Loosens the CheckConditionsForEmotePatch to allow emoting while running and jumping
+Loosens the CheckConditionsForEmotePatch to allow emoting while running and jumping and other states
 
 ## Config
 
@@ -13,7 +13,7 @@ Additional settings can be found in the cfg file to adjust when emotes are allow
 ## Known gripes
 
 - Emoting negates any animations so you wont see running animations etc
-- Clicking the same emote button will not stop the emote, this is a limitation that is here to stay to allow for compatibility with MoreEmotes
+- Clicking the same emote button will not stop the emote, this is a limitation that is here to stay to allow for compatibility with MoreEmotes/BetterEmotes
 
  ## Changelog
 
