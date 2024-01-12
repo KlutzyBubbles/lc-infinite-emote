@@ -7,21 +7,33 @@ using BepInEx.Configuration;
 namespace InfiniteEmote
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.HardDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public static Texture2D texture;
+
+        public static bool debug = false;
 
         public static ManualLogSource StaticLogger;
 
         private void Awake()
         {
             StaticLogger = Logger;
+            StaticLogger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} loading...");
 
-            ConfigEntry<string> configStopEmoteKey = Config.Bind("Keys", "Stop Emote Key", "<Keyboard>/0", "Default keybind to stop emoting");
-            Patches.stopEmoteKey = configStopEmoteKey.Value.ToLower().StartsWith("<keyboard>") ? configStopEmoteKey.Value : $"<Keyboard>/{configStopEmoteKey.Value}";
+            ConfigEntry<bool> configDebug = Config.Bind("Dev", "Debug", false, "Whether or not to enable debug logging and debug helpers");
+            debug = configDebug.Value;
+            StaticLogger.LogInfo($"Debug enabled: {debug}");
+
+            Debug("Loading keybind defaults");
+            ConfigEntry<string> configStopEmoteKey = Config.Bind("Keys", "Stop Emote Key", "<Keyboard>/minus", "Default keybind to stop emoting");
+            Patches.stopEmoteKey = configStopEmoteKey.Value.Equals("") ? "" : (configStopEmoteKey.Value.ToLower().StartsWith("<keyboard>") ? configStopEmoteKey.Value : $"<Keyboard>/{configStopEmoteKey.Value}");
             ConfigEntry<string> configStopEmoteController = Config.Bind("Keys", "Stop Emote Button", "<Gamepad>/leftStickPress", "Default controller button to stop emoting");
-            Patches.stopEmoteController = configStopEmoteController.Value.ToLower().StartsWith("<gamepad>") ? configStopEmoteController.Value : $"<Gamepad>/{configStopEmoteController.Value}";
+            Patches.stopEmoteController = configStopEmoteController.Value.Equals("") ? "" : (configStopEmoteController.Value.ToLower().StartsWith("<gamepad>") ? configStopEmoteController.Value : $"<Gamepad>/{configStopEmoteController.Value}");
+            Debug($"Loaded key '{Patches.stopEmoteKey}'");
+            Debug($"Loaded button '{Patches.stopEmoteController}'");
 
+            Debug("Loading emote while options");
             ConfigEntry<bool> whileJumpingConfig = Config.Bind<bool>("Emote while", "Jumping", true, "Whether or not to allow emoting while Jumping");
             Patches.whileJumping = whileJumpingConfig.Value;
             ConfigEntry<bool> whileWalkingConfig = Config.Bind<bool>("Emote while", "Walking", true, "Whether or not to allow emoting while Walking");
@@ -42,10 +54,23 @@ namespace InfiniteEmote
             Patches.whileHolding = whileHoldingConfig.Value;
             ConfigEntry<bool> whileHoldingTwoHandConfig = Config.Bind<bool>("Emote while", "HoldingTwoHand", true, "Whether or not to allow emoting while Holding a two handed object");
             Patches.whileHoldingTwoHand = whileHoldingTwoHandConfig.Value;
+            Debug($"Loaded whileJumping '{Patches.whileJumping}'");
+            Debug($"Loaded whileWalking '{Patches.whileWalking}'");
+            Debug($"Loaded whileSprinting '{Patches.whileSprinting}'");
+            Debug($"Loaded whileCrouching '{Patches.whileCrouching}'");
+            Debug($"Loaded whileLadder '{Patches.whileLadder}'");
+            Debug($"Loaded whileGrabbing '{Patches.whileGrabbing}'");
+            Debug($"Loaded whileTyping '{Patches.whileTyping}'");
+            Debug($"Loaded whileTerminal '{Patches.whileTerminal}'");
+            Debug($"Loaded whileHoldingTwoHand '{Patches.whileHoldingTwoHand}'");
 
             Patches.keybinds = new Keybinds();
             new Harmony(PluginInfo.PLUGIN_GUID).PatchAll(typeof(Patches));
             StaticLogger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+        }
+        public static void Debug(string message)
+        {
+            if (debug) StaticLogger.LogDebug(message);
         }
     }
 }
