@@ -1,27 +1,13 @@
 ﻿using HarmonyLib;
 using GameNetcodeStuff;
 using UnityEngine.InputSystem;
-using BepInEx.Bootstrap;
-using BepInEx;
-using System.Collections.Generic;
-using System.EnterpriseServices.Internal;
+using System;
 
 namespace InfiniteEmote
 {
     internal class Patches
     {
         public static Keybinds keybinds;
-
-        public static bool whileJumping;
-        public static bool whileWalking;
-        public static bool whileSprinting;
-        public static bool whileCrouching;
-        public static bool whileLadder;
-        public static bool whileGrabbing;
-        public static bool whileTyping;
-        public static bool whileTerminal;
-        public static bool whileHolding;
-        public static bool whileHoldingTwoHand;
 
         public static string stopEmoteKey;
         public static string stopEmoteController;
@@ -73,9 +59,13 @@ namespace InfiniteEmote
 
         [HarmonyPatch(typeof(PlayerControllerB), "CheckConditionsForEmote")]
         [HarmonyPostfix]
+        [HarmonyAfter(["BetterEmotes", "MoreEmotes"])]
         private static void CheckConditionsForEmotePatch(PlayerControllerB __instance, ref bool __result)
         {
-            Plugin.Debug("CheckConditionsForEmotePatch");
+            if (__instance == null)
+            {
+                return;
+            }
             if (__instance.inSpecialInteractAnimation || __instance.isPlayerDead)
             {
                 Plugin.Debug($"inSpecialInteractAnimation ({__instance.inSpecialInteractAnimation}) or isPlayerDead ({__instance.isPlayerDead})");
@@ -84,8 +74,8 @@ namespace InfiniteEmote
             }
             if (__instance.isGrabbingObjectAnimation)
             {
-                Plugin.Debug($"isGrabbingObjectAnimation ({__instance.isGrabbingObjectAnimation}), whileGrabbing ({whileGrabbing})");
-                if (whileGrabbing)
+                Plugin.Debug($"isGrabbingObjectAnimation ({__instance.isGrabbingObjectAnimation}), whileGrabbing ({Config.Instance.WhileGrabbing})");
+                if (Config.Instance.WhileGrabbing)
                 {
                     __result = true;
                 }
@@ -97,13 +87,13 @@ namespace InfiniteEmote
             }
             if (__instance.isHoldingObject)
             {
-                Plugin.Debug($"isHoldingObject ({__instance.isHoldingObject}), whileHolding ({whileHolding})");
-                if (whileHolding)
+                Plugin.Debug($"isHoldingObject ({__instance.isHoldingObject}), whileHolding ({Config.Instance.WhileHolding})");
+                if (Config.Instance.WhileHolding)
                 {
                     if (__instance.twoHanded)
                     {
-                        Plugin.Debug($"twoHanded ({__instance.twoHanded}), whileHoldingTwoHand ({whileHoldingTwoHand})");
-                        if (whileHoldingTwoHand)
+                        Plugin.Debug($"twoHanded ({__instance.twoHanded}), whileHoldingTwoHand ({Config.Instance.WhileHoldingTwoHand})");
+                        if (Config.Instance.WhileHoldingTwoHand)
                         {
                             __result = true;
                         }
@@ -126,33 +116,33 @@ namespace InfiniteEmote
             }
             if (__instance.isJumping)
             {
-                Plugin.Debug($"isJumping, whileJumping ({whileJumping})");
-                __result = whileJumping;
+                Plugin.Debug($"isJumping, whileJumping ({Config.Instance.WhileJumping})");
+                __result = Config.Instance.WhileJumping;
             }
             if (__instance.isWalking)
             {
-                Plugin.Debug($"isWalking, whileWalking ({whileWalking})");
-                __result = whileWalking;
+                Plugin.Debug($"isWalking, whileWalking ({Config.Instance.WhileWalking})");
+                __result = Config.Instance.WhileWalking;
             }
             if (__instance.isSprinting)
             {
-                Plugin.Debug($"isSprinting, whileSprinting ({whileSprinting})");
-                __result = whileSprinting;
+                Plugin.Debug($"isSprinting, whileSprinting ({Config.Instance.WhileSprinting})");
+                __result = Config.Instance.WhileSprinting;
             }
             if (__instance.isCrouching)
             {
-                Plugin.Debug($"isCrouching, whileCrouching ({whileCrouching})");
-                __result = whileCrouching;
+                Plugin.Debug($"isCrouching, whileCrouching ({Config.Instance.WhileCrouching})");
+                __result = Config.Instance.WhileCrouching;
             }
             if (__instance.isClimbingLadder)
             {
-                Plugin.Debug($"isClimbingLadder, whileLadder ({whileLadder})");
-                __result = whileLadder;
+                Plugin.Debug($"isClimbingLadder, whileLadder ({Config.Instance.WhileLadder})");
+                __result = Config.Instance.WhileLadder;
             }
             if (__instance.isTypingChat)
             {
                 int currentEmote = __instance.playerBodyAnimator.GetInteger("emoteNumber");
-                Plugin.Debug($"isTypingChat, whileTyping ({whileTyping}), moreEmotes ({moreEmotes}), currentEmote ({currentEmote})");
+                Plugin.Debug($"isTypingChat, whileTyping ({Config.Instance.WhileTyping}), moreEmotes ({moreEmotes}), currentEmote ({currentEmote})");
                 if (moreEmotes && currentEmote == 10)
                 {
                     Plugin.Debug($"isEmoteNumber 10 (Sign for MoreEmotes)");
@@ -160,13 +150,13 @@ namespace InfiniteEmote
                 }
                 else
                 {
-                    __result = whileTyping;
+                    __result = Config.Instance.WhileTyping;
                 }
             }
             if (__instance.inTerminalMenu)
             {
-                Plugin.Debug($"inTerminalMenu, whileTerminal ({whileTerminal})");
-                __result = whileTerminal;
+                Plugin.Debug($"inTerminalMenu, whileTerminal ({Config.Instance.WhileTerminal})");
+                __result = Config.Instance.WhileTerminal;
             }
             if (__result == false)
             {
@@ -184,25 +174,40 @@ namespace InfiniteEmote
                 Plugin.Debug($"result ({result})");
                 __result = result;
             }
-            Plugin.Debug("--------------------");
             return;
         }
 
-        [HarmonyPatch(typeof(InitializeGame), "Start")]
-        [HarmonyPrefix]
-        private static void StartPostfix()
+        [HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
+        [HarmonyPostfix]
+        private static void InitializeLocalPlayer()
         {
-            Plugin.Debug("InitializeGame.StartPostfix");
-            foreach (KeyValuePair<string, BepInEx.PluginInfo> keyValuePair in Chainloader.PluginInfos)
+            Plugin.Debug("InitializeLocalPlayer()");
+            if (Config.IsHost)
             {
-                BepInPlugin metadata = keyValuePair.Value.Metadata;
-                if (metadata.GUID.Equals("MoreEmotes"))
+                try
                 {
-                    Plugin.Debug("Found MoreEmotes");
-                    moreEmotes = true;
-                    break;
+                    Config.MessageManager.RegisterNamedMessageHandler("ModName_OnRequestConfigSync", Config.OnRequestSync);
+                    Config.Synced = true;
                 }
+                catch (Exception e)
+                {
+                    Plugin.Logger.LogError(e);
+                }
+
+                return;
             }
+
+            Config.Synced = false;
+            Config.MessageManager.RegisterNamedMessageHandler("ModName_OnReceiveConfigSync", Config.OnReceiveSync);
+            Config.RequestSync();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameNetworkManager), "StartDisconnect")]
+        public static void PlayerLeave()
+        {
+            Plugin.Debug("PlayerLeave()");
+            Config.RevertSync();
         }
     }
 }
